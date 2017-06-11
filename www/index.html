@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
-    <title></title>
+    <title>Arc Track - Arc System Solutions</title>
 
     <link rel="manifest" href="manifest.json">
 
@@ -18,7 +18,7 @@
 
     <link href="lib/ionic/css/ionic.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
-
+    <link href="css/loader.css" rel="stylesheet">
     <!-- IF using Sass (run gulp sass first), then uncomment below and remove the CSS includes above
     <link href="css/ionic.app.css" rel="stylesheet">
     -->
@@ -31,10 +31,37 @@
 
     <!-- your app's js -->
     <script src="js/app.js"></script>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/default.js"></script>
     <script src="js/controllers.js"></script>
+    
+    <script src="dist/ng-cordova.js"></script>
+    <script src="dist/cordova.js"></script>
   </head>
 
   <body ng-app="starter">
     <ion-nav-view></ion-nav-view>
+
+<style>
+  .pre_blocker{
+   position:fixed;
+   left:0;
+   top:0;
+   z-index:99999999999;
+   width:100%;
+   height:100%;
+   overflow:visible;
+   background: rgba(0,0,0,0.8);
+   color: #fff;
+   display: table;
+}
+</style>
+  <div class="pre_blocker" style="display:none;">
+      <center>
+       <p style="padding-top:20%;font-size: 15px;">  
+       <svg class="spinner" width="65px" height="65px" viewBox="0 0 66 66" xmlns=""><circle class="circle" fill="none" stroke-width="6" stroke-linecap="round" cx="33" cy="33" r="30"></circle></svg>
+      </center>
+  </div>
+
   </body>
 </html>
