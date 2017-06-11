@@ -1,6 +1,6 @@
 angular.module('starter.controllers', ['ionic','ngCordova'])
 
-.controller('AppCtrl', function($scope, $ionicModal, $timeout,$state, $ionicPopup, $timeout, $ionicNavBarDelegate, $cordovaGeolocation) {
+.controller('AppCtrl', function($http,$scope, $ionicModal, $timeout,$state, $ionicPopup, $timeout, $ionicNavBarDelegate, $cordovaGeolocation) {
 
   var current_position = function(){
 
@@ -48,19 +48,28 @@ angular.module('starter.controllers', ['ionic','ngCordova'])
           switch(action){
             case "logout":
                 loader('on');
-                localStorage.setItem("token", "");
-                localStorage.setItem("token_name", "");
-                  if(localStorage.getItem("token") !== null && localStorage.getItem("token") !== ""){
-                      $scope.out_list = false;
-                      $scope.token_check = true;
-                      $scope.in_list = true;
-                  }else{
-                      $scope.in_list = false;
-                      $scope.token_check = false;
-                      $scope.out_list = true;
+
+                $http.get(getBaseURL()+"App/track_logout").success(function(data){
+
+                  console.log(data)
+                  if(data == "success"){
+
+                      localStorage.setItem("token", "");
+                      localStorage.setItem("token_name", "");
+                        if(localStorage.getItem("token") !== null && localStorage.getItem("token") !== ""){
+                            $scope.out_list = false;
+                            $scope.token_check = true;
+                            $scope.in_list = true;
+                        }else{
+                            $scope.in_list = false;
+                            $scope.token_check = false;
+                            $scope.out_list = true;
+                        }
+                      $state.go("app.login")
+                       loader('off');
+
                   }
-                $state.go("app.login")
-                 loader('off');
+                })
 
             break;
           }
@@ -84,32 +93,87 @@ angular.module('starter.controllers', ['ionic','ngCordova'])
 
    });
  }; 
+
+ $scope.choice_interval = {};
   //END OF DEPENDECIES
 
-  var insert_location = function(long,lat){
-    
-  }
 
-  $scope.start_submit = function(){
-         
-      setInterval(function(){
+  var start_interval = function(timex){
+    setInterval(function(){
           var posOptions = {enableHighAccuracy: true};
            $cordovaGeolocation.getCurrentPosition(posOptions).then(function (position) {
               var lat  = position.coords.latitude
               var long = position.coords.longitude
-              console.log(lat + '   ' + long)
+              
+              insert_location(long,lat);
            }, function(err) {
               console.log(err)
            });
 
-      },2000)
+      },timex)
+  }
+
+
+  var insert_location = function(long,lat,timex){
+     
+      $token = localStorage.getItem("token");
+      $token_name = localStorage.getItem("token_name");
+     
+     $track_attr = {
+        longitude: long,
+        latitude: lat,
+        csrf_token_name:$token 
+      }
+
+      console.log($track_attr);
+      $.ajax({
+        url: getBaseURL()+"Tracks/process_tracks",
+        type: "POST",
+        data:{
+          'action':'save',
+          'longitude': long,
+          'latitude': lat,
+          'token': $token,
+          'csrf_token_name':$token 
+        },success:function(data){
+          console.log(data);
+          //start_interval(timex)
+        },error:function(data){
+          console.log(data.responseText)
+        }
+      })
+//
+      // $http({
+      //   url: getBaseURL()+"Tracks/process_tracks",
+      //   method: "POST",
+      //   data:$.param($track_attr),
+      //   headers:{
+      //     'Content-Type':'application/x-www-form-urlencoded'
+      //   }
+      // }).success(function(data){
+      //   start_interval(timex)
+      // })
+
+  }
+
+  $scope.start_submit = function(){
+      
+      $time = $scope.choice_interval.select;
+          var posOptions = {enableHighAccuracy: true};
+           $cordovaGeolocation.getCurrentPosition(posOptions).then(function (position) {
+              var lat  = position.coords.latitude
+              var long = position.coords.longitude              
+              insert_location(long,lat,$time);
+           }, function(err) {
+              console.log(err)
+           });
+
         
 
   }
 
 
   $scope.logout = function(){
-    
            $scope.showConfirm('Confirm Logout','Are you sure to logout?','logout')
   } 
 
@@ -169,12 +233,12 @@ angular.module('starter.controllers', ['ionic','ngCordova'])
         
         $scope.loginData.from = "mobile";  
         $http({
-          url: "http://localhost/arctrack/App/validate_login",
+          url: getBaseURL()+"App/validate_login",
           method: "POST",
           data:$.param($scope.loginData),
           headers:{'Content-Type':'application/x-www-form-urlencoded'}
         }).success(function(data){
-
+            console.log(data);
             loader('off')
            if(data == "error"){
              $scope.showAlert('Arc Track','<strong style="color:red;">Invalid Email/Password!</strong>');

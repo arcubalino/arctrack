@@ -103,7 +103,8 @@ function getBaseURL() {
     var base_url = '';
     base_url = origin+pathArray[1];
 
-    return base_url+'/';
+    return "http://localhost/arctrack/"
+    //return base_url+'/';
 }
 
 function getURIstring(){

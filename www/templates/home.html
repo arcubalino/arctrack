@@ -1,11 +1,28 @@
 <ion-view>
   <ion-content>
 
-
-  		<button ng-click="start_submit()" class="button button-balanced">
-  			Start
-		</button>
-
+  	<div class="row responsive-sm">
+  		<div class="col">
+  			<center><h3 class="title" style="color:#4683eb;">Submit Data Location</h3></center>
+  			<small><em style="color:gray;">*Choose time interval of sending data.</em></small>
+	  		<ion-list>
+			  <ion-radio ng-model="choice_interval.select" value="5000">5 seconds</ion-radio>
+			  <ion-radio ng-model="choice_interval.select" value="10000">10 seconds</ion-radio>
+			  <ion-radio ng-model="choice_interval.select" value="15000">15 seconds</ion-radio>
+			  <ion-radio ng-model="choice_interval.select" value="20000">20 seconds</ion-radio>
+			</ion-list>
+			<br>
+			<div align="center">
+		  		<button ng-click="start_submit('on')" class="button button-balanced" style="width:30%;">
+		  			<span class="ion-ios-paperplane-outline" data-tags="add, include, new, invite, +"></span> Start
+				</button>
+				&nbsp;
+		  		<button ng-click="start_submit('off')" class="button button-assertive" style="width:30%;" disabled="disabled">
+		  			Stop
+				</button>
+			</div>
+		</div>
+	</div>	
 
   </ion-content>
 </ion-view>
