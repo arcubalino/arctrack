@@ -1,26 +1,7 @@
 angular.module('starter.controllers', ['ionic','ngCordova'])
 
-.controller('AppCtrl', function($http,$scope, $ionicModal, $timeout,$state, $ionicPopup, $timeout, $ionicNavBarDelegate, $cordovaGeolocation) {
+.controller('AppCtrl', function($http,$scope, $ionicModal, $timeout,$state, $ionicPopup, $timeout, $ionicNavBarDelegate, $cordovaGeolocation,$window) {
 
-  var current_position = function(){
-
-   // var watchOptions = {timeout : 3000, enableHighAccuracy: false};
-   // var watch = $cordovaGeolocation.watchPosition(watchOptions);
-  
-   // watch.then(
-   //    null,
-    
-   //    function(err) {
-   //       console.log(err)
-   //    },
-    
-   //    function(position) {
-   //       var lat  = position.coords.latitude
-   //       var long = position.coords.longitude
-   //       console.log(lat + '' + long)
-   //    }
-   // );
-  }
 
   //DEPENDENCIES:  
     $ionicNavBarDelegate.showBackButton(false);
@@ -67,7 +48,7 @@ angular.module('starter.controllers', ['ionic','ngCordova'])
                         }
                       $state.go("app.login")
                        loader('off');
-
+                       $window.location.reload(); 
                   }
                 })
 
@@ -98,34 +79,45 @@ angular.module('starter.controllers', ['ionic','ngCordova'])
   //END OF DEPENDECIES
 
 
-  var start_interval = function(timex){
-    setInterval(function(){
+
+  var start_interval = function(){
+      $time = $scope.choice_interval.select;
+      $shit = $("#shit_here").val();
+      $shit2 = $("#shit_here2").val();
+      
+      $what_long = $("#what_long").val();
+      $what_lat = $("#what_lat").val();
+
+      setInterval(function(){
           var posOptions = {enableHighAccuracy: true};
            $cordovaGeolocation.getCurrentPosition(posOptions).then(function (position) {
               var lat  = position.coords.latitude
               var long = position.coords.longitude
               
-              insert_location(long,lat);
+              if($shit=="success" && $shit2=="" && lat != $what_lat && long != $what_long){
+                  console.log('start interval..'+$time+'');
+                  insert_location(long,lat);
+              }else{
+                  console.log('stop interval..');
+              }
            }, function(err) {
               console.log(err)
            });
 
-      },timex)
+      },$time)
+
   }
 
 
-  var insert_location = function(long,lat,timex){
-     
+  var insert_location = function(long,lat){
+      $("#what_long").val(long);
+      $("#what_lat").val(lat);
       $token = localStorage.getItem("token");
       $token_name = localStorage.getItem("token_name");
+      $arc_email = localStorage.getItem("arc_email");
+      $arc_pass = localStorage.getItem("arc_pass");
+      $arc_id = localStorage.getItem("arc_id");
      
-     $track_attr = {
-        longitude: long,
-        latitude: lat,
-        csrf_token_name:$token 
-      }
-
-      console.log($track_attr);
       $.ajax({
         url: getBaseURL()+"Tracks/process_tracks",
         type: "POST",
@@ -134,39 +126,63 @@ angular.module('starter.controllers', ['ionic','ngCordova'])
           'longitude': long,
           'latitude': lat,
           'token': $token,
+          'arc_id': $arc_id,
+          'arc_email': $arc_email,
+          'arc_pass': $arc_pass,
           'csrf_token_name':$token 
         },success:function(data){
           console.log(data);
-          //start_interval(timex)
+
+          if(data == "success"){
+              $("#shit_here").val(data); 
+          }
+
+          start_interval();
+
         },error:function(data){
           console.log(data.responseText)
         }
       })
-//
-      // $http({
-      //   url: getBaseURL()+"Tracks/process_tracks",
-      //   method: "POST",
-      //   data:$.param($track_attr),
-      //   headers:{
-      //     'Content-Type':'application/x-www-form-urlencoded'
-      //   }
-      // }).success(function(data){
-      //   start_interval(timex)
-      // })
+
 
   }
 
-  $scope.start_submit = function(){
-      
+  $scope.start_submit = function(action){
+
       $time = $scope.choice_interval.select;
-          var posOptions = {enableHighAccuracy: true};
-           $cordovaGeolocation.getCurrentPosition(posOptions).then(function (position) {
-              var lat  = position.coords.latitude
-              var long = position.coords.longitude              
-              insert_location(long,lat,$time);
-           }, function(err) {
-              console.log(err)
-           });
+      if($time == undefined){
+         $scope.showAlert('Arc Track','Please choose time interval!','');
+      }else{
+
+          switch(action){
+            case "on":
+            $("#time_list").attr('style','cursor:wait;pointer-events:none;opacity:0.6')
+            $("#shit_here2").val('');
+            $("#start_btn").attr('disabled',true);
+            $("#stop_btn").attr('disabled',false);
+              var posOptions = {enableHighAccuracy: true};
+               $cordovaGeolocation.getCurrentPosition(posOptions).then(function (position) {
+                  var lat  = position.coords.latitude
+                  var long = position.coords.longitude              
+                  insert_location(long,lat,$time);
+               }, function(err) {
+                  console.log(err)
+               });
+            break;
+
+            case "off":
+              loader('on');
+              $("#time_list").removeAttr('style');
+              $window.location.reload(); 
+              $state.go($state.current, {}, {reload: true});
+              $("#shit_here2").val('stop');
+              $("#start_btn").attr('disabled',false);
+              $("#stop_btn").attr('disabled',true);
+            break;
+          }
+
+      }
+   
 
         
 
@@ -196,7 +212,11 @@ angular.module('starter.controllers', ['ionic','ngCordova'])
   $ionicSideMenuDelegate.canDragContent(false)
   loader('off');
   $scope.loginData = {};
+  $token = localStorage.getItem("token");
 
+  if($token!=""){
+     $state.go('app.home'); 
+  }
 
   $scope.validate_login = function(){
 
@@ -238,16 +258,22 @@ angular.module('starter.controllers', ['ionic','ngCordova'])
           data:$.param($scope.loginData),
           headers:{'Content-Type':'application/x-www-form-urlencoded'}
         }).success(function(data){
-            console.log(data);
+            //console.log(data);
             loader('off')
            if(data == "error"){
              $scope.showAlert('Arc Track','<strong style="color:red;">Invalid Email/Password!</strong>');
            }else{
             $token_name = data.split("|")[0];
             $token_value = data.split("|")[1];
+            $arc_id = data.split("|")[3];
+            $email = data.split("|")[2];
+            $pass = data.split("|")[4];
 
             localStorage.setItem("token", $token_value);
             localStorage.setItem("token_name", $token_name);
+            localStorage.setItem("arc_id", $arc_id);
+            localStorage.setItem("arc_email", $email);
+            localStorage.setItem("arc_pass", $pass);
              $state.go('app.home'); 
            }
           
