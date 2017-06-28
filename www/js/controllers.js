@@ -76,6 +76,28 @@ angular.module('starter.controllers', ['ionic','ngCordova'])
  }; 
 
  $scope.choice_interval = {};
+
+ var checkNetConnection = function(){
+     var xhr = new XMLHttpRequest();
+     var file = "http://about.arcsystems.ph";
+     var r = Math.round(Math.random() * 10000);
+     xhr.open('HEAD', file + "?subins=" + r, false);
+     try {
+      xhr.send();
+      if (xhr.status >= 200 && xhr.status < 304) {
+        $("#submit_danger").hide();
+       return true;
+      } else {
+        
+        $("#submit_danger").show();
+       return false;
+      }
+     } catch (e) {
+     
+        $("#submit_danger").show();
+      return false;
+     }
+}
   //END OF DEPENDECIES
 
 
@@ -84,7 +106,7 @@ angular.module('starter.controllers', ['ionic','ngCordova'])
       $time = $scope.choice_interval.select;
       $shit = $("#shit_here").val();
       $shit2 = $("#shit_here2").val();
-      
+      var amIOnline = checkNetConnection();
       $what_long = $("#what_long").val();
       $what_lat = $("#what_lat").val();
 
@@ -94,8 +116,8 @@ angular.module('starter.controllers', ['ionic','ngCordova'])
               var lat  = position.coords.latitude
               var long = position.coords.longitude
               
-              if($shit=="success" && $shit2=="" && lat != $what_lat && long != $what_long){
-                  console.log('start interval..'+$time+'');
+              if($shit=="success" && $shit2=="" && lat != $what_lat && long != $what_long && amIOnline){
+                  //console.log('start interval..'+$time+'');
                   insert_location(long,lat);
               }else{
                   console.log('stop interval..');
@@ -147,6 +169,8 @@ angular.module('starter.controllers', ['ionic','ngCordova'])
 
   }
 
+
+
   $scope.start_submit = function(action){
 
       $time = $scope.choice_interval.select;
@@ -156,18 +180,25 @@ angular.module('starter.controllers', ['ionic','ngCordova'])
 
           switch(action){
             case "on":
-            $("#time_list").attr('style','cursor:wait;pointer-events:none;opacity:0.6')
-            $("#shit_here2").val('');
-            $("#start_btn").attr('disabled',true);
-            $("#stop_btn").attr('disabled',false);
-              var posOptions = {enableHighAccuracy: true};
-               $cordovaGeolocation.getCurrentPosition(posOptions).then(function (position) {
-                  var lat  = position.coords.latitude
-                  var long = position.coords.longitude              
-                  insert_location(long,lat,$time);
-               }, function(err) {
-                  console.log(err)
-               });
+            var amIOnline = checkNetConnection();
+            
+              if(!amIOnline){
+                $scope.showAlert('Arc Track','<strong style="color:red;">You are currently Offline!</strong>','');
+              }else{
+                $("#time_list").attr('style','cursor:wait;pointer-events:none;opacity:0.6')
+                $("#shit_here2").val('');
+                $("#start_btn").attr('disabled',true);
+                $("#stop_btn").attr('disabled',false);
+                  var posOptions = {enableHighAccuracy: true};
+                   $cordovaGeolocation.getCurrentPosition(posOptions).then(function (position) {
+                      var lat  = position.coords.latitude
+                      var long = position.coords.longitude              
+                      insert_location(long,lat,$time);
+                   }, function(err) {
+                      console.log(err)
+                   });
+              }
+
             break;
 
             case "off":
