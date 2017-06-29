@@ -29,7 +29,7 @@ angular.module('starter.controllers', ['ionic','ngCordova'])
           switch(action){
             case "logout":
                 loader('on');
-                  state.go("app.login")
+                
                 $http.get(getBaseURL()+"App/track_logout").success(function(data){
                   console.log(data)
                   if(data == "success"){
@@ -45,8 +45,8 @@ angular.module('starter.controllers', ['ionic','ngCordova'])
                             $scope.token_check = false;
                             $scope.out_list = true;
                         }
-                       loader('off');
-                        state.go("app.login")
+                        loader('off');
+                        $state.go("app.login")
                       
                        //$window.location.reload(); 
                   }
@@ -243,7 +243,18 @@ angular.module('starter.controllers', ['ionic','ngCordova'])
   $ionicSideMenuDelegate.canDragContent(false)
   loader('off');
   $scope.loginData = {};
+
+  localStorage.setItem("token", "");
+  localStorage.setItem("token_name", "");
+  localStorage.setItem("arc_id", "");
+  localStorage.setItem("arc_email", "");
+  localStorage.setItem("arc_pass", "");
+
+
   $token = localStorage.getItem("token");
+
+
+
 
   if($token!=""){
      $state.go('app.home'); 
