@@ -1,7 +1,7 @@
 angular.module('starter.controllers', ['ionic','ngCordova'])
 
 .controller('AppCtrl', function($http,$scope, $ionicModal, $timeout,$state, $ionicPopup, $timeout, $ionicNavBarDelegate, $cordovaGeolocation,$window) {
-
+  $("#menu_toogle").attr('class','button button-icon button-clear ion-navicon')
 
   //DEPENDENCIES:  
     $ionicNavBarDelegate.showBackButton(false);
@@ -141,7 +141,7 @@ angular.module('starter.controllers', ['ionic','ngCordova'])
       $arc_id = localStorage.getItem("arc_id");
      
       $.ajax({
-        url: getBaseURL()+"Tracks/process_tracks",
+        url: "http://track.arcsystems.ph/index.php/Tracks/process_tracks",
         type: "POST",
         data:{
           'action':'save',
@@ -284,7 +284,7 @@ angular.module('starter.controllers', ['ionic','ngCordova'])
         
         $scope.loginData.from = "mobile";  
         $http({
-          url: getBaseURL()+"App/validate_login",
+          url: "http://track.arcsystems.ph/index.php/App/validate_login",
           method: "POST",
           data:$.param($scope.loginData),
           headers:{'Content-Type':'application/x-www-form-urlencoded'}
