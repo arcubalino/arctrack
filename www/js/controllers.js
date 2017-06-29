@@ -321,6 +321,8 @@ angular.module('starter.controllers', ['ionic','ngCordova'])
           
         }).error(function(data){
           console.log(data)
+          $scope.showAlert('Arc Track','<strong style="color:red;">Error encountered while login!</strong>');
+          loader('off')
         });
           
 
