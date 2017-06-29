@@ -29,9 +29,8 @@ angular.module('starter.controllers', ['ionic','ngCordova'])
           switch(action){
             case "logout":
                 loader('on');
-
+                  state.go("app.login")
                 $http.get(getBaseURL()+"App/track_logout").success(function(data){
-
                   console.log(data)
                   if(data == "success"){
 
