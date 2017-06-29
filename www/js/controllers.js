@@ -46,9 +46,10 @@ angular.module('starter.controllers', ['ionic','ngCordova'])
                             $scope.token_check = false;
                             $scope.out_list = true;
                         }
-                      $state.go("app.login")
                        loader('off');
-                       $window.location.reload(); 
+                        state.go("app.login")
+                      
+                       //$window.location.reload(); 
                   }
                 })
 
